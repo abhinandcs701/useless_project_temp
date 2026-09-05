@@ -1,1 +1,621 @@
+<div id="app-root"></div>
+<style>
+  #app-root {
+    --paper: #EDE6D6;
+    --paper-dark: #E1D8C3;
+    --ink: #221E19;
+    --ink-soft: #55503f;
+    --navy: #161A21;
+    --navy-soft: #232833;
+    --stamp-red: #A32B2E;
+    --gold: #B9955A;
+    --hairline: #c9bfa4;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--navy);
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(185,149,90,0.06), transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(163,43,46,0.05), transparent 40%);
+    padding: 28px 16px 60px;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+  #app-root * { box-sizing: border-box; }
+  .mono { font-family: "Courier New", Courier, monospace; }
 
+  .folder {
+    max-width: 880px;
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+    position: relative;
+  }
+  .folder-tab {
+    position: absolute;
+    top: -22px;
+    left: 32px;
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-bottom: none;
+    padding: 6px 18px 4px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+  }
+  .folder-header {
+    padding: 40px 36px 22px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .case-no {
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+  }
+  .case-title {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 30px;
+    line-height: 1.15;
+    margin: 0 0 10px;
+    font-weight: 700;
+  }
+  .case-sub {
+    font-size: 14px;
+    color: var(--ink-soft);
+    max-width: 56ch;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .intake {
+    padding: 26px 36px;
+    border-bottom: 1px solid var(--hairline);
+    background: var(--paper-dark);
+  }
+  .intake-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .btn {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 9px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
+    cursor: pointer;
+    transition: transform 0.1s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.secondary { background: transparent; color: var(--ink); }
+  .dropzone {
+    border: 1.5px dashed var(--ink-soft);
+    padding: 22px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    background: rgba(255,255,255,0.25);
+  }
+  .dropzone.drag { border-color: var(--stamp-red); color: var(--stamp-red); }
+  .intake-error { color: var(--stamp-red); font-size: 12.5px; margin-top: 10px; }
+
+  .section { padding: 30px 36px; border-bottom: 1px solid var(--hairline); }
+  .section:last-child { border-bottom: none; }
+  .section-label {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after { content: ""; flex: 1; height: 1px; background: var(--hairline); }
+
+  .empty-state { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+
+  .rapsheet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+  }
+  .rapcard {
+    border: 1px solid var(--ink);
+    background: #fff;
+    padding: 16px;
+    position: relative;
+  }
+  .rapcard.mostwanted { border-color: var(--stamp-red); }
+  .stamp {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 10px;
+    color: var(--stamp-red);
+    border: 1.5px solid var(--stamp-red);
+    padding: 2px 6px;
+    transform: rotate(8deg);
+    letter-spacing: 0.05em;
+  }
+  .rap-name { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+  .rap-count { font-size: 11.5px; color: var(--ink-soft); margin-bottom: 12px; }
+  .charge-list { list-style: none; padding: 0; margin: 0 0 12px; font-size: 12.5px; line-height: 1.7; }
+  .charge-list li::before { content: "· "; color: var(--stamp-red); font-weight: 700; }
+  .charge-list.clean { color: var(--ink-soft); font-style: italic; }
+  .charge-list.clean li::before { content: ""; }
+  .score-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-top: 1px solid var(--hairline); padding-top: 8px; font-size: 12px;
+  }
+  .score-val { font-family: "Courier New", Courier, monospace; font-size: 15px; font-weight: 700; }
+  .score-val.pos { color: var(--stamp-red); }
+  .score-val.neg { color: #3d6b4a; }
+
+  .combo-list { display: flex; flex-direction: column; gap: 8px; }
+  .combo-item {
+    font-size: 13px; padding: 10px 12px; background: #fff; border-left: 3px solid var(--gold);
+  }
+  .combo-item b { font-family: "Courier New", Courier, monospace; }
+
+  .bar-row { display: grid; grid-template-columns: 90px 1fr 56px; gap: 10px; align-items: center; margin-bottom: 10px; font-size: 12.5px; }
+  .bar-track { background: var(--paper-dark); border: 1px solid var(--hairline); height: 16px; position: relative; overflow: hidden; }
+  .bar-fill { height: 100%; }
+  .bar-fill.pos { background: var(--stamp-red); }
+  .bar-fill.neg { background: #6a8072; }
+  .bar-val { text-align: right; font-family: "Courier New", Courier, monospace; }
+
+  .exhibit {
+    background: #fff;
+    border: 1px solid var(--ink);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .exhibit-tag { font-family: "Courier New", Courier, monospace; font-size: 11px; color: var(--gold); margin-bottom: 6px; letter-spacing: 0.06em; }
+  .exhibit-quote { font-size: 15px; margin: 0 0 8px; }
+  .exhibit-meta { font-size: 11.5px; color: var(--ink-soft); }
+
+  .footer-note { padding: 18px 36px; font-size: 11px; color: #8f8770; background: var(--navy-soft); }
+</style>
+<script>
+(function () {
+  const root = document.getElementById("app-root");
+
+  // ---------------- parsing + scoring logic ----------------
+  const EMOJI_RE = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/gu;
+  const extractEmojis = (msg) => msg.match(EMOJI_RE) || [];
+  const longestRun = (arr) => {
+    if (!arr.length) return 0;
+    let longest = 1, cur = 1;
+    for (let i = 1; i < arr.length; i++) {
+      if (arr[i] === arr[i - 1]) { cur++; longest = Math.max(longest, cur); } else cur = 1;
+    }
+    return longest;
+  };
+
+  function parseWhatsAppDateTime(dateStr, timeStr) {
+    const [a, b, y] = dateStr.split("/").map((s) => s.trim());
+    const year = y.length === 2 ? 2000 + parseInt(y, 10) : parseInt(y, 10);
+    const ampmMatch = timeStr.match(/([AaPp][Mm])$/);
+    const timeCore = timeStr.replace(/\s?[AaPp][Mm]$/, "").trim();
+    const parts = timeCore.split(":").map((n) => parseInt(n, 10));
+    let hh = parts[0], mm = parts[1];
+    if (ampmMatch) {
+      const isPM = ampmMatch[1].toLowerCase() === "pm";
+      if (isPM && hh !== 12) hh += 12;
+      if (!isPM && hh === 12) hh = 0;
+    }
+    let month = parseInt(a, 10), day = parseInt(b, 10);
+    if (month > 12) [month, day] = [day, month];
+    const d = new Date(year, month - 1, day, hh, mm || 0);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function parseWhatsApp(text) {
+    const lineRe = /^\[?(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?\s?(?:[AaPp][Mm])?)\]?\s*-?\s*([^:]+):\s(.*)$/;
+    const rows = [];
+    for (const raw of text.split("\n")) {
+      const line = raw.replace(/\r$/, "");
+      const m = line.match(lineRe);
+      if (m) {
+        const [, dateStr, timeStr, sender, message] = m;
+        const dt = parseWhatsAppDateTime(dateStr, timeStr);
+        if (!dt) continue;
+        rows.push({ timestamp: dt, sender: sender.trim(), message: message.trim() });
+      } else if (rows.length && line.trim()) {
+        rows[rows.length - 1].message += " " + line.trim();
+      }
+    }
+    rows.sort((x, y) => x.timestamp - y.timestamp);
+    return rows;
+  }
+
+  function parseTelegram(jsonText) {
+    const data = JSON.parse(jsonText);
+    const rows = [];
+    for (const msg of data.messages || []) {
+      if (msg.type !== "message") continue;
+      let text = msg.text;
+      if (Array.isArray(text)) text = text.map((t) => (typeof t === "string" ? t : t.text || "")).join("");
+      if (!text) continue;
+      rows.push({ timestamp: new Date(msg.date), sender: msg.from || "Unknown", message: String(text).trim() });
+    }
+    rows.sort((x, y) => x.timestamp - y.timestamp);
+    return rows;
+  }
+
+  function computeFeatures(rows) {
+    return rows.map((row, i) => {
+      const prev = rows[i - 1];
+      const sameSenderAsPrev = !!prev && prev.sender === row.sender;
+      const responseTimeMin = !sameSenderAsPrev && prev ? (row.timestamp - prev.timestamp) / 60000 : null;
+      const emojis = extractEmojis(row.message);
+      const prevEmojis = prev ? extractEmojis(prev.message) : [];
+      const repeatsPrevEmoji = sameSenderAsPrev && emojis.some((e) => prevEmojis.includes(e));
+      const letters = row.message.replace(/[^A-Za-z]/g, "");
+      const allCaps = letters.length >= 4 && letters === letters.toUpperCase();
+      return {
+        ...row,
+        response_time_min: responseTimeMin,
+        double_texted: sameSenderAsPrev ? 1 : 0,
+        message_length: row.message.length,
+        emoji_count: emojis.length,
+        max_emoji_run: longestRun(emojis),
+        repeats_prev_emoji: repeatsPrevEmoji ? 1 : 0,
+        all_caps: allCaps ? 1 : 0,
+      };
+    });
+  }
+
+  const mean = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
+  const std = (arr) => { const m = mean(arr); return Math.sqrt(mean(arr.map((x) => (x - m) ** 2))); };
+  const median = (arr) => { const s = [...arr].sort((a, b) => a - b); const n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
+
+  function buildStats(feat) {
+    const senders = [...new Set(feat.map((f) => f.sender))];
+    const stats = {};
+    for (const s of senders) {
+      const rows = feat.filter((f) => f.sender === s);
+      const respTimes = rows.map((r) => r.response_time_min).filter((v) => v !== null);
+      stats[s] = {
+        sender: s,
+        n_messages: rows.length,
+        avg_response_min: mean(respTimes),
+        avg_length: mean(rows.map((r) => r.message_length)),
+        avg_emoji: mean(rows.map((r) => r.emoji_count)),
+        avg_emoji_run: mean(rows.map((r) => r.max_emoji_run)),
+        max_emoji_run: Math.max(0, ...rows.map((r) => r.max_emoji_run)),
+        emoji_repeat_rate: mean(rows.map((r) => r.repeats_prev_emoji)),
+        double_text_rate: mean(rows.map((r) => r.double_texted)),
+        worst_emoji_message: rows.reduce((best, r) => (r.max_emoji_run > (best ? best.max_emoji_run : -1) ? r : best), null),
+      };
+    }
+    return stats;
+  }
+
+  function zscoreMap(stats, key) {
+    const vals = Object.values(stats).map((s) => s[key]);
+    const m = mean(vals), sd = std(vals);
+    const z = {};
+    for (const s of Object.values(stats)) z[s.sender] = sd > 0 ? (s[key] - m) / sd : 0;
+    return z;
+  }
+
+  function crown(stats, key, minZ = 0.5) {
+    const z = zscoreMap(stats, key);
+    const ranked = Object.values(stats).slice().sort((a, b) => z[b.sender] - z[a.sender]);
+    const winner = ranked[0];
+    const flagged = z[winner.sender] >= minZ;
+    return { winner: flagged ? winner.sender : null, value: winner[key], z: z[winner.sender] };
+  }
+
+  function punishmentScores(stats) {
+    const zResp = zscoreMap(stats, "avg_response_min");
+    const zLen = zscoreMap(stats, "avg_length");
+    const zDt = zscoreMap(stats, "double_text_rate");
+    const zRun = zscoreMap(stats, "avg_emoji_run");
+    const zRep = zscoreMap(stats, "emoji_repeat_rate");
+    const scores = {};
+    for (const s of Object.keys(stats)) scores[s] = zResp[s] + zLen[s] + zDt[s] + zRun[s] * 2 + zRep[s] * 1.5;
+    return scores;
+  }
+
+  function buildCombos(stats) {
+    const vals = Object.values(stats);
+    const medLen = median(vals.map((s) => s.avg_length));
+    const medDt = median(vals.map((s) => s.double_text_rate));
+    const medResp = median(vals.map((s) => s.avg_response_min));
+    const medEmoji = median(vals.map((s) => s.avg_emoji));
+    const medRun = median(vals.map((s) => s.avg_emoji_run));
+    const medRep = median(vals.map((s) => s.emoji_repeat_rate));
+    const combos = {};
+    for (const s of vals) {
+      const tags = [];
+      if (s.avg_length > medLen && s.double_text_rate > medDt) tags.push(["Yapper-Texter", "writes essays AND can't wait for a reply"]);
+      if (s.avg_response_min > medResp && s.avg_emoji > medEmoji) tags.push(["Mixed Signals", "leaves you on seen then floods emojis"]);
+      if (s.double_text_rate > medDt && s.avg_emoji > medEmoji) tags.push(["Notification Terrorist", "double-texts AND emoji-spams"]);
+      if (s.avg_emoji_run > medRun && s.emoji_repeat_rate > medRep) tags.push(["Copy-Paste Emoji Offender", "same emoji within AND across messages"]);
+      if (tags.length) combos[s.sender] = tags;
+    }
+    return combos;
+  }
+
+  function analyze(rows) {
+    const feat = computeFeatures(rows);
+    const stats = buildStats(feat);
+    const crowns = {
+      seen: crown(stats, "avg_response_min"),
+      yapper: crown(stats, "avg_length"),
+      emoji: crown(stats, "avg_emoji"),
+      dtext: crown(stats, "double_text_rate"),
+      broken: crown(stats, "avg_emoji_run"),
+    };
+    const combos = buildCombos(stats);
+    const scores = punishmentScores(stats);
+    return { feat, stats, crowns, combos, scores };
+  }
+
+  // ---------------- sample data ----------------
+  function buildSampleWhatsApp() {
+    const script = [
+      ["Priya", "guys are we still doing the cabin trip this weekend??"],
+      ["Alex", "yeah down"],
+      ["Alex", "what dates were we thinking"],
+      ["Sam", "i thought it was sat-sun?"],
+      ["Jordan", "wait i might have work sat morning \u{1F629}"],
+      ["You", "we could leave sat afternoon instead"],
+      ["Priya", "fine by me"],
+      ["Sam", "same"],
+      ["Jordan", "ok that works, ill be done by 2"],
+      ["Alex", "bet"],
+      ["Priya", "who's driving"],
+      ["You", "i can take my car, fits 4"],
+      ["Sam", "ill bring mine too then, easy"],
+      ["Priya", "WAIT ITS 60 EACH?? i thought it was 40"],
+      ["Sam", "lol it went up bc peak season"],
+      ["Jordan", "should i bring the speaker"],
+      ["You", "bring it just in case"],
+      ["Alex", "food plan? groceries there or bringing stuff"],
+      ["Sam", "groceries there is easier tbh"],
+      ["Priya", "agreed, less to carry"],
+      ["Sam", "\u{1F602}\u{1F602}\u{1F602}\u{1F602}\u{1F602} bro stop"],
+      ["Sam", "\u{1F602}\u{1F602}\u{1F602} im dead"],
+      ["Sam", "\u{1F602}\u{1F602} wait fr"],
+      ["You", "sounds good, see yall sat"],
+    ];
+    let t = new Date(2026, 7, 21, 14, 3);
+    const lines = [];
+    for (const [sender, msg] of script) {
+      const gap = Math.random() < 0.15 ? [8, 15, 40, 90][Math.floor(Math.random() * 4)] : [1, 2, 3, 4][Math.floor(Math.random() * 4)];
+      t = new Date(t.getTime() + gap * 60000);
+      const hh = t.getHours() % 12 === 0 ? 12 : t.getHours() % 12;
+      const ampm = t.getHours() >= 12 ? "PM" : "AM";
+      const mm = String(t.getMinutes()).padStart(2, "0");
+      lines.push(`${t.getMonth() + 1}/${t.getDate()}/${String(t.getFullYear()).slice(2)}, ${hh}:${mm} ${ampm} - ${sender}: ${msg}`);
+    }
+    return lines.join("\n");
+  }
+
+  function buildSampleTelegram() {
+    const script = [
+      ["Priya", "ok hackathon team dinner tonight, what are we getting"],
+      ["Alex", "pizza is the only correct answer here"],
+      ["Alex", "im not even joking we have 6 hours left"],
+      ["Sam", "we literally had pizza yesterday"],
+      ["Jordan", "yeah can we do literally anything else \u{1F62D}"],
+      ["You", "sushi place down the street is pretty fast"],
+      ["Priya", "ooh im down for sushi"],
+      ["Alex", "PIZZA IS FASTER TRUST ME"],
+      ["Jordan", "alex chill its 15 min tops either way"],
+      ["You", "ill order now if we vote"],
+      ["Priya", "sushi from me"],
+      ["Sam", "sushi"],
+      ["Alex", "fine. sushi. but im getting the biggest roll they have"],
+      ["Alex", "as revenge"],
+      ["Alex", "\u{1F355}\u{1F355}\u{1F355} mourning my pizza rn"],
+      ["Priya", "lol get over it"],
+      ["Sam", "how long left on the submission again"],
+      ["Jordan", "like 5hrs 40 min"],
+      ["You", "ill start recording once food gets here"],
+      ["Priya", "should we run through the pitch once more"],
+      ["Alex", "yes pls, i keep messing up the intro line"],
+    ];
+    let t = new Date(2026, 8, 1, 19, 2);
+    const messages = [];
+    let id = 1000;
+    for (const [sender, text] of script) {
+      const gap = Math.random() < 0.12 ? [12, 25, 60][Math.floor(Math.random() * 3)] : [1, 2, 3][Math.floor(Math.random() * 3)];
+      t = new Date(t.getTime() + gap * 60000);
+      messages.push({ id: id++, type: "message", date: t.toISOString().slice(0, 19), from: sender, text });
+    }
+    return JSON.stringify({ name: "Hackathon Team Chat", messages });
+  }
+
+  // ---------------- UI ----------------
+  let state = { result: null, error: null, sourceLabel: null };
+
+  function el(tag, attrs = {}, children = []) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "class") e.className = v;
+      else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v);
+    }
+    for (const c of [].concat(children)) {
+      if (c == null) continue;
+      e.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    }
+    return e;
+  }
+
+  function fmt(n) { return Number.isFinite(n) ? n.toFixed(1) : "—"; }
+
+  function chargeLine(label, detail) {
+    return el("li", {}, `${label} — ${detail}`);
+  }
+
+  function buildCharges(sender, stats, crowns) {
+    const charges = [];
+    if (crowns.seen.winner === sender) charges.push(chargeLine("Leaves-on-seen champion", `${fmt(stats.avg_response_min)} min avg reply gap`));
+    if (crowns.yapper.winner === sender) charges.push(chargeLine("Certified yapper", `${fmt(stats.avg_length)} chars/msg avg`));
+    if (crowns.emoji.winner === sender) charges.push(chargeLine("Emoji spammer-in-chief", `${fmt(stats.avg_emoji)} emojis/msg avg`));
+    if (crowns.dtext.winner === sender) charges.push(chargeLine("Double-text offender", `${Math.round(stats.double_text_rate * 100)}% of messages`));
+    if (crowns.broken.winner === sender) charges.push(chargeLine("Broken Record", `same emoji ${stats.max_emoji_run}x in a row`));
+    return charges;
+  }
+
+  function render() {
+    root.innerHTML = "";
+    const folder = el("div", { class: "folder" });
+    folder.appendChild(el("div", { class: "folder-tab mono" }, "EXHIBIT INTAKE"));
+
+    const header = el("div", { class: "folder-header" }, [
+      el("div", { class: "case-no mono" }, `CASE FILE NO. ${new Date().getFullYear()}-GC${String(Math.floor(Math.random() * 900) + 100)}`),
+      el("h1", { class: "case-title" }, "THE PEOPLE v. THE GROUP CHAT"),
+      el("p", { class: "case-sub" }, "Drop in a WhatsApp or Telegram export. We'll pull the receipts: who leaves you on seen, who won't stop double-texting, and who's spamming the same emoji into the ground."),
+    ]);
+    folder.appendChild(header);
+
+    const intake = el("div", { class: "intake" });
+    const btnRow = el("div", { class: "intake-row" }, [
+      el("button", { class: "btn", onclick: () => loadSample("whatsapp") }, "Load sample WhatsApp chat"),
+      el("button", { class: "btn secondary", onclick: () => loadSample("telegram") }, "Load sample Telegram chat"),
+    ]);
+    intake.appendChild(btnRow);
+
+    const fileInput = el("input", { type: "file", accept: ".txt,.json", style: "display:none", onchange: (e) => handleFile(e.target.files[0]) });
+    const dz = el("div", { class: "dropzone" }, state.sourceLabel ? `Loaded: ${state.sourceLabel} — drop another file or click to replace` : "Drop a .txt (WhatsApp) or .json (Telegram) export here, or click to browse");
+    dz.addEventListener("click", () => fileInput.click());
+    dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.classList.add("drag"); });
+    dz.addEventListener("dragleave", () => dz.classList.remove("drag"));
+    dz.addEventListener("drop", (e) => {
+      e.preventDefault(); dz.classList.remove("drag");
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    intake.appendChild(dz);
+    intake.appendChild(fileInput);
+    if (state.error) intake.appendChild(el("div", { class: "intake-error" }, state.error));
+    folder.appendChild(intake);
+
+    if (!state.result) {
+      folder.appendChild(el("div", { class: "section" }, [
+        el("div", { class: "empty-state" }, "No evidence on file yet. Load a sample above to see the case unfold, or bring your own export."),
+      ]));
+    } else {
+      const { stats, crowns, combos, scores } = state.result;
+      const senders = Object.values(stats);
+      const topOffender = senders.slice().sort((a, b) => scores[b.sender] - scores[a.sender])[0];
+
+      // rap sheet
+      const rapGrid = el("div", { class: "rapsheet-grid" });
+      for (const s of senders) {
+        const charges = buildCharges(s.sender, s, crowns);
+        const isTop = topOffender && s.sender === topOffender.sender && charges.length;
+        const card = el("div", { class: "rapcard" + (isTop ? " mostwanted" : "") });
+        if (isTop) card.appendChild(el("div", { class: "stamp mono" }, "MOST WANTED"));
+        card.appendChild(el("div", { class: "rap-name" }, s.sender));
+        card.appendChild(el("div", { class: "rap-count" }, `${s.n_messages} messages on record`));
+        card.appendChild(
+          charges.length
+            ? el("ul", { class: "charge-list" }, charges)
+            : el("ul", { class: "charge-list clean" }, [el("li", {}, "No charges filed — clean record")])
+        );
+        const score = scores[s.sender];
+        card.appendChild(el("div", { class: "score-row" }, [
+          el("span", {}, "Punishment score"),
+          el("span", { class: "score-val " + (score >= 0 ? "pos" : "neg") }, (score >= 0 ? "+" : "") + score.toFixed(2)),
+        ]));
+        rapGrid.appendChild(card);
+      }
+      folder.appendChild(el("div", { class: "section" }, [el("div", { class: "section-label" }, "RAP SHEET"), rapGrid]));
+
+      // combos
+      const comboEntries = Object.entries(combos);
+      const comboSection = el("div", { class: "section" }, [el("div", { class: "section-label" }, "COMBO OFFENSES")]);
+      if (comboEntries.length) {
+        const list = el("div", { class: "combo-list" });
+        for (const [sender, tags] of comboEntries) {
+          for (const [name, desc] of tags) {
+            list.appendChild(el("div", { class: "combo-item" }, [el("b", {}, `${sender} — ${name}: `), desc]));
+          }
+        }
+        comboSection.appendChild(list);
+      } else {
+        comboSection.appendChild(el("div", { class: "empty-state" }, "Nobody stacked enough behaviors for a combo charge. Suspiciously well-adjusted group."));
+      }
+      folder.appendChild(comboSection);
+
+      // sentencing scale
+      const maxAbs = Math.max(1, ...senders.map((s) => Math.abs(scores[s.sender])));
+      const scaleSection = el("div", { class: "section" }, [el("div", { class: "section-label" }, "SENTENCING SCALE")]);
+      const ranked = senders.slice().sort((a, b) => scores[b.sender] - scores[a.sender]);
+      for (const s of ranked) {
+        const score = scores[s.sender];
+        const pct = Math.min(100, (Math.abs(score) / maxAbs) * 100);
+        scaleSection.appendChild(el("div", { class: "bar-row" }, [
+          el("div", { class: "mono" }, s.sender),
+          el("div", { class: "bar-track" }, [el("div", { class: "bar-fill " + (score >= 0 ? "pos" : "neg"), style: `width:${pct}%` })]),
+          el("div", { class: "bar-val" }, (score >= 0 ? "+" : "") + score.toFixed(1)),
+        ]));
+      }
+      folder.appendChild(scaleSection);
+
+      // exhibits
+      const exhibitSection = el("div", { class: "section" }, [el("div", { class: "section-label" }, "EXHIBITS")]);
+      const withRuns = senders.filter((s) => s.max_emoji_run >= 3 && s.worst_emoji_message);
+      if (withRuns.length) {
+        withRuns.sort((a, b) => b.max_emoji_run - a.max_emoji_run);
+        withRuns.forEach((s, i) => {
+          const letter = String.fromCharCode(65 + i);
+          exhibitSection.appendChild(el("div", { class: "exhibit" }, [
+            el("div", { class: "exhibit-tag" }, `EXHIBIT ${letter} — SAME EMOJI, ${s.max_emoji_run}x IN A ROW`),
+            el("p", { class: "exhibit-quote" }, `"${s.worst_emoji_message.message}"`),
+            el("div", { class: "exhibit-meta" }, `— ${s.sender}`),
+          ]));
+        });
+      } else {
+        exhibitSection.appendChild(el("div", { class: "empty-state" }, "No emoji-spam evidence found in this chat."));
+      }
+      folder.appendChild(exhibitSection);
+    }
+
+    folder.appendChild(el("div", { class: "footer-note mono" }, "All parsing happens locally in your browser. Nothing is uploaded anywhere."));
+    root.appendChild(folder);
+  }
+
+  function loadSample(kind) {
+    try {
+      if (kind === "whatsapp") {
+        const rows = parseWhatsApp(buildSampleWhatsApp());
+        state = { result: analyze(rows), error: null, sourceLabel: "sample_group_chat.txt (WhatsApp)" };
+      } else {
+        const rows = parseTelegram(buildSampleTelegram());
+        state = { result: analyze(rows), error: null, sourceLabel: "sample_telegram_chat.json (Telegram)" };
+      }
+    } catch (err) {
+      state = { result: null, error: "Couldn't parse sample: " + err.message, sourceLabel: null };
+    }
+    render();
+  }
+
+  function handleFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        let rows;
+        if (file.name.endsWith(".json")) rows = parseTelegram(reader.result);
+        else rows = parseWhatsApp(reader.result);
+        if (!rows.length) throw new Error("No messages could be parsed from this file — check the export format.");
+        state = { result: analyze(rows), error: null, sourceLabel: file.name };
+      } catch (err) {
+        state = { result: null, error: "Couldn't parse file: " + err.message, sourceLabel: null };
+      }
+      render();
+    };
+    reader.readAsText(file);
+  }
+
+  render();
+})();
+</script>
