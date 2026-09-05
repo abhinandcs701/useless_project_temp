@@ -53,19 +53,23 @@ For the browser interface, just open `case_file_handbook.html` in any browser �
 ### Project Documentation
 For Software:
 
-# Screenshots (Add at least 3)
-![Screenshot1](Add screenshot of the "start here" upload screen)
-*The drag-and-drop file intake and sample-chat buttons — this is the entry point before any chat is loaded.*
+# Screenshots 
+![Screenshot1].*<img width="1324" height="774" alt="image" src="https://github.com/user-attachments/assets/bf30c101-5d29-4b87-a9e7-ac56cf2c46ec" />
 
-![Screenshot2](Add screenshot of the rap sheet section)
-*The per-person leaderboard: charges filed against each sender, their punishment score, and the "Most Wanted" badge on the worst offender.*
 
-![Screenshot3](Add screenshot of the exhibits section)
-*Real quoted messages used as evidence for the emoji-spam charges — Exhibit A, straight from the chat.*
+
+<img width="1314" height="841" alt="image" src="https://github.com/user-attachments/assets/42b68aa5-d557-4363-ba8e-faafacf879d0" />
+
+
+<img width="1332" height="648" alt="image" src="https://github.com/user-attachments/assets/ac1399df-87a3-4900-aecd-18f6f8a592cd" />
+
+<img width="1408" height="331" alt="image" src="https://github.com/user-attachments/assets/a2f30662-3675-4460-a899-a326ec8026a1" />
+
 
 # Diagrams
 ![Workflow](Add a flowchart: chat export → parser → feature extraction → z-score ranking → roast report)
-*How a raw chat export becomes a scored, roasted leaderboard: parse messages → extract behavioral features → rank senders by z-score against the group baseline → render charges, combos, and punishment scores.*
+<img width="873" height="236" alt="image" src="https://github.com/user-attachments/assets/1be956bb-9e92-48ae-b375-3c7528ad4e63" />
+
 
 For Hardware:
 N/A — software only.
