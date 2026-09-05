@@ -2,13 +2,11 @@
 
 # Roast Report 🎯
 
-## Basic Details Your group chat already knows who's the problem. We just made it say it out loud.
-### Team Name: [Your Team Name]
+## Basic Details:  Your group chat already knows who's the problem. We just made it say it out loud.Your insights and your responses.
+### Team Name: N2G
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+Abhinand c s 
 
 ### Project Description
 Roast Report puts your group chat on trial. Drop in a real WhatsApp or Telegram export and it hands back a "case file" of who leaves you on seen, who double-texts, who yaps, and who spams the same emoji into oblivion — with actual quoted messages as evidence.
