@@ -79,9 +79,8 @@ N/A — software only.
 [Add a link to a live-hosted version of case_file_handbook.html, or attach the sample chat files used in the demo, if useful]
 
 ## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+- Abhinand cs: programmer
+- Abhinand cs: HTML design
 
 ---
 Made with ❤️ at TinkerHub Useless Projects
